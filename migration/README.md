@@ -15,3 +15,6 @@
 
 ### I found a bug:
 * Report an issue describing it as verbosely as possible.
+
+### Current Bugs:
+* Installations having Pages with Child Pages might be buggy since Bludit v2 Static Pages cannot have a child.
