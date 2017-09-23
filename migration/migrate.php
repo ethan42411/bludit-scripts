@@ -34,7 +34,7 @@ $databasesWhiteList = [
  * 1. Recursive Copy. Thanks http://php.net/manual/en/function.copy.php
  * 2. Recusive Delete rrmdir() rm -rf. Thanks https://stackoverflow.com/questions/3338123/how-do-i-recursively-delete-a-directory-and-its-entire-contents-files-sub-dir
  * 3. dd() Pretty print_r
- * 4. stripFirstLine() : Removed mandatory BLUDIT string
+ * 4. stripFirstLine() : Removes mandatory BLUDIT string
  * 5. insert() : Inserts mandatory BLUDIT string + encoded Json back to database
  */
 function recurse_copy($src,$dst) {
@@ -69,11 +69,11 @@ function rrmdir($dir) {
     }
 }
 
-/* Die and dump */
+/* Dump and die */
 function dd($variable, $die = false) {
-    echo "<br><pre>";
+    echo "<pre>";
     ($die) ? die( print_r($variable) ) : print_r($variable);
-    echo "<br></pre>";
+    echo "</pre>";
 }
 
 // Remove first line function. Helper function to remove string "<?php defined('BLUDIT')" from db
@@ -83,6 +83,7 @@ function stripFirstLine($text)
     return substr( $text, strpos($text, "\n")+1 );
 }
 
+// Insert to database
 function insert($filePath, $data) {
     $compulsoryBluditLine = "<?php defined('BLUDIT') or die('Bludit CMS.'); ?>\n";
     $content = $compulsoryBluditLine . json_encode($data, JSON_PRETTY_PRINT);
@@ -103,7 +104,7 @@ if( file_exists($migrationDirectoryName) ) {
 if ( !mkdir('migrations', 0755) ) {
     die('Failed to create directory. No write permission available.');
 } else {
-    echo 'Successfuly created Migration Directory...';
+    echo '<br>Successfuly created Migration Directory...';
 }
 if ( !mkdir($failedMigrationDirectoryName, 0755) ) {
     die('Failed to create directory. No write permission available.');
