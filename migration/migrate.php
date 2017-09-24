@@ -91,6 +91,13 @@ function insert($filePath, $data) {
 }
 
 /**
+ * First we check if script was copied to the right directory.
+ */
+if( !file_exists($contentDirectoryName) ){
+    die("Failed: Script was copied to the wrong directory. Make sure it is copied where $contentDirectoryName exists.");
+}
+
+/**
  * Create migrations directory (Delete if it already exists)
  */
 if( file_exists($migrationDirectoryName) ) {
@@ -99,13 +106,14 @@ if( file_exists($migrationDirectoryName) ) {
      * Thanks https://stackoverflow.com/questions/4594180/deleting-all-files-from-a-folder-using-php
      */
     rrmdir($migrationDirectoryName);
-
 }
+
 if ( !mkdir('migrations', 0755) ) {
     die('Failed to create directory. No write permission available.');
 } else {
-    echo '<br>Successfuly created Migration Directory...';
+    echo "<br>Successfuly created Migration Directory...<br>$breakLine";
 }
+
 if ( !mkdir($failedMigrationDirectoryName, 0755) ) {
     die('Failed to create directory. No write permission available.');
 }
@@ -341,7 +349,8 @@ if (file_exists ($migratedContentPath . '/databases/pages.php') ){
     foreach ($json as $pageKey => $values) {
         // Ignore Error page. Not needed.
         if ($pageKey !== 'error') {
-            $values['status'] = 'static';
+            // Leave drafts as it is. Else Change page type to static.
+            $values['status'] = ($values['status'] === 'draft') ? 'draft' : 'static';
             $values['allowComments'] = 'true';
             $values['md5file'] = md5_file($migratedContentPath . '/pages/' . $pageKey . '/' . FILENAME);
             // DEBUG: Static pages cannot have children. This Script might be buggy if static pages have children.
@@ -352,12 +361,18 @@ if (file_exists ($migratedContentPath . '/databases/pages.php') ){
 }
 
 // Migrate posts.php to pages.php
+$failedPostsMetaData = [];
 if (file_exists ($migratedContentPath . '/databases/posts.php') ){
     $data = stripFirstLine( file_get_contents($migratedContentPath . '/databases/posts.php') );
     $json = json_decode($data, true);
     foreach ($json as $pageKey => $values) {
         // Ignore iteration if pageKey exists in $failedPosts
         if (in_array($pageKey, $failedPosts)) {
+            $values['parent'] = isset($values['parent']) ? $values['parent'] : "";
+            $values['allowComments'] = 'true';
+            $values['slug'] = $pageKey;
+            $values['md5file'] = md5_file($migratedContentPath . '/pages/' . $pageKey . '/' . FILENAME);
+            $failedPostsMetaData[$pageKey] = $values;
             continue;
         }
 
@@ -367,9 +382,9 @@ if (file_exists ($migratedContentPath . '/databases/posts.php') ){
         $values['md5file'] = md5_file($migratedContentPath . '/pages/' . $pageKey . '/' . FILENAME);
         $finalPages[$pageKey] = $values;
     }
-
-
 }
+// Add Failed Meta Data to failed.php
+insert($failedMigrationDirectoryName . '/failed.php', $failedPostsMetaData);
 
 // Delete Deprecated posts.php
 if (file_exists ($migratedContentPath . '/databases/posts.php') ){
@@ -381,7 +396,15 @@ if (file_exists ($migratedContentPath . '/databases/posts.php') ){
 insert($migratedContentPath . '/databases/pages.php', $finalPages);
 echo "<br>$breakLine";
 echo "<br>Failed Migrations (Posts): " . count($failedPosts);
-echo "<br>Fixing Permissions";
+echo "<br>Add these manually:";
+
+if( count($failedPosts) > 0 ){
+    echo '<ol>';
+    echo '<li>' . implode('<li>', $failedPosts);
+    echo "</ol>$breakLine";
+}
+
+echo "<br>Fixing Permissions...";
 chmod($contentDirectoryName, 0755);
 
 echo "<br>Successfuly migrated.";
