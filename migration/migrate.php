@@ -111,7 +111,7 @@ if( file_exists($migrationDirectoryName) ) {
 if ( !mkdir('migrations', 0755) ) {
     die('Failed to create directory. No write permission available.');
 } else {
-    echo "<br>Successfuly created Migration Directory...<br>$breakLine";
+    echo "<br>Successfuly created Migration Directory...";
 }
 
 if ( !mkdir($failedMigrationDirectoryName, 0755) ) {
@@ -396,9 +396,9 @@ if (file_exists ($migratedContentPath . '/databases/posts.php') ){
 insert($migratedContentPath . '/databases/pages.php', $finalPages);
 echo "<br>$breakLine";
 echo "<br>Failed Migrations (Posts): " . count($failedPosts);
-echo "<br>Add these manually:";
 
 if( count($failedPosts) > 0 ){
+    echo "<br>Add these manually:";
     echo '<ol>';
     echo '<li>' . implode('<li>', $failedPosts);
     echo "</ol>$breakLine";
