@@ -383,8 +383,10 @@ if (file_exists ($migratedContentPath . '/databases/posts.php') ){
         $finalPages[$pageKey] = $values;
     }
 }
-// Add Failed Meta Data to failed.php
-insert($failedMigrationDirectoryName . '/failed.php', $failedPostsMetaData);
+// Add Failed Meta Data to failed.php if count > 0
+if ( count ($failedPostsMetaData) > 0) {
+    insert($failedMigrationDirectoryName . '/failed.php', $failedPostsMetaData);
+}
 
 // Delete Deprecated posts.php
 if (file_exists ($migratedContentPath . '/databases/posts.php') ){
