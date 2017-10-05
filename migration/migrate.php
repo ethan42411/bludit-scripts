@@ -17,7 +17,7 @@ $contentDirectoryName = 'bl-content';
 $migratedContentPath = $migrationDirectoryName . '/' . $contentDirectoryName;
 $breakLine = '------------------------------';
 // Core plugins/databases only.
-$pluginsWhiteList = ['about', 'pages', 'simplemde', 'tags'];
+$pluginsWhiteList = ['about', 'simplemde', 'tags'];
 $databasesWhiteList = [
     'categories.php',
     'pages.php',
@@ -85,7 +85,7 @@ function stripFirstLine($text)
 
 // Insert to database
 function insert($filePath, $data) {
-    $compulsoryBluditLine = "<?php defined('BLUDIT') or die('Bludit CMS.'); ?>\n";
+    $compulsoryBluditLine = "<?php defined('BLUDIT') or die('Bludit CMS.'); ?>".PHP_EOL;
     $content = $compulsoryBluditLine . json_encode($data, JSON_PRETTY_PRINT);
     file_put_contents($filePath, $content);
 }
@@ -181,20 +181,6 @@ $allPlugins = array_diff(scandir($migratedContentPath . '/databases/plugins'), a
 foreach ($allPlugins as $plugin) {
     $tmp = $migratedContentPath . '/databases/plugins/' . $plugin . '/';
     switch($plugin) {
-        case "pages":
-            if( file_exists($tmp . 'db.php') ){
-                $data = stripFirstLine( file_get_contents($tmp . 'db.php') );
-                $json = json_decode($data);
-                $json->position= 1;
-                $json->amountOfItems= 5;
-            } else{
-                echo "<br>Plugin $plugin db.php not found";
-            }
-            // Insert to db
-            insert($tmp . 'db.php', $json);
-            // dd($json);
-            break;
-
         case "tags":
             if( file_exists($tmp . 'db.php') ){
                 $data = stripFirstLine( file_get_contents($tmp . 'db.php') );
@@ -208,7 +194,7 @@ foreach ($allPlugins as $plugin) {
             // dd($json);
             break;
 
-        // case about and simplemde are not needed since nothing is changed.
+        // case about and simplemde are not needed since nothing is changed. pages plugin is deprecated.
     }
 }
 
@@ -220,11 +206,8 @@ $allDatabases = array_diff(scandir($migratedContentPath . '/databases'), array('
 $tmp = $migratedContentPath . '/databases/syslog.php';
 insert($tmp, []);
 
-foreach ( $allDatabases as $database ) {
-    $tmp = $migratedContentPath . '/databases/' . $database;
-    switch($database) {
-        case "categories.php":
-
+// Add new default categories
+$tmp = $migratedContentPath . '/databases/categories.php';
 $RAW_CATEGORIES_PHP_FROM_V2 =
 <<<'RAW'
 <?php defined('BLUDIT') or die('Bludit CMS.'); ?>
@@ -246,8 +229,11 @@ $RAW_CATEGORIES_PHP_FROM_V2 =
     }
 }
 RAW;
-        file_put_contents($tmp, $RAW_CATEGORIES_PHP_FROM_V2);
-        break;
+file_put_contents($tmp, $RAW_CATEGORIES_PHP_FROM_V2);
+
+foreach ( $allDatabases as $database ) {
+    $tmp = $migratedContentPath . '/databases/' . $database;
+    switch($database) {
 
         case "security.php":
             if( file_exists($tmp) ){
@@ -351,10 +337,9 @@ if (file_exists ($migratedContentPath . '/databases/pages.php') ){
         if ($pageKey !== 'error') {
             // Leave drafts as it is. Else Change page type to static.
             $values['status'] = ($values['status'] === 'draft') ? 'draft' : 'static';
+            $values['type'] = 'page';
             $values['allowComments'] = 'true';
             $values['md5file'] = md5_file($migratedContentPath . '/pages/' . $pageKey . '/' . FILENAME);
-            // DEBUG: Static pages cannot have children. This Script might be buggy if static pages have children.
-            // Bludit v2.0 bug. | Check Page 3 Flow Text in Notes.
             $finalPages[$pageKey] = $values;
         }
     }
@@ -368,6 +353,8 @@ if (file_exists ($migratedContentPath . '/databases/posts.php') ){
     foreach ($json as $pageKey => $values) {
         // Ignore iteration if pageKey exists in $failedPosts
         if (in_array($pageKey, $failedPosts)) {
+            $values['status'] = ($values['status'] === 'draft') ? 'draft' : 'published';
+            $values['type'] = 'post';
             $values['parent'] = isset($values['parent']) ? $values['parent'] : "";
             $values['allowComments'] = 'true';
             $values['slug'] = $pageKey;
@@ -376,6 +363,8 @@ if (file_exists ($migratedContentPath . '/databases/posts.php') ){
             continue;
         }
 
+        $values['status'] = ($values['status'] === 'draft') ? 'draft' : 'published';
+        $values['type'] = 'post';
         $values['parent'] = isset($values['parent']) ? $values['parent'] : "";
         $values['allowComments'] = 'true';
         $values['slug'] = $pageKey;
