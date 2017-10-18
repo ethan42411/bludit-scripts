@@ -351,17 +351,6 @@ if (file_exists ($migratedContentPath . '/databases/posts.php') ){
     $data = stripFirstLine( file_get_contents($migratedContentPath . '/databases/posts.php') );
     $json = json_decode($data, true);
     foreach ($json as $pageKey => $values) {
-        // Ignore iteration if pageKey exists in $failedPosts
-        if (in_array($pageKey, $failedPosts)) {
-            $values['status'] = ($values['status'] === 'draft') ? 'draft' : 'published';
-            $values['type'] = 'post';
-            $values['parent'] = isset($values['parent']) ? $values['parent'] : "";
-            $values['allowComments'] = 'true';
-            $values['slug'] = $pageKey;
-            $values['md5file'] = md5_file($migratedContentPath . '/pages/' . $pageKey . '/' . FILENAME);
-            $failedPostsMetaData[$pageKey] = $values;
-            continue;
-        }
 
         $values['status'] = ($values['status'] === 'draft') ? 'draft' : 'published';
         $values['type'] = 'post';
@@ -369,7 +358,16 @@ if (file_exists ($migratedContentPath . '/databases/posts.php') ){
         $values['allowComments'] = 'true';
         $values['slug'] = $pageKey;
         $values['md5file'] = md5_file($migratedContentPath . '/pages/' . $pageKey . '/' . FILENAME);
-        $finalPages[$pageKey] = $values;
+        // Posts do not have a position by default in v1 but Bludit v2 requires them
+        $values['position'] = isset($values['position']) ? $values['position'] : 1;
+
+        // Ignore iteration if pageKey exists in $failedPosts
+        if (in_array($pageKey, $failedPosts)) {
+            $failedPostsMetaData[$pageKey] = $values;
+            continue;
+        } else {
+            $finalPages[$pageKey] = $values;
+        }
     }
 }
 // Add Failed Meta Data to failed.php if count > 0
