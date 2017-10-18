@@ -267,6 +267,10 @@ foreach ( $allDatabases as $database ) {
                 // Deprecated
                 unset($json->postsperpage);
                 unset($json->uriPost);
+                // cliMode is deprecated in Bludit v2
+                if ( isset($json->cliMode) ) {
+                    unset($json->cliMode);
+                }
             } else {
                 echo "<br>Database $database not found";
             }
