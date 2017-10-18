@@ -7,6 +7,7 @@
 * Script migrates only the Core plugin data and user data (posts, pages, uploads etc.) to the new db structure.
 * Third party plugin data is not migrated intentionally. We do not know if v1 plugins are compatible with v2.
 * Script sets the theme to "log" for safer/better compatibility. Change your custom/stock theme manually after migration.
+* NOTE: All `scheduled` posts/pages are changed to `published`.
 * If you notice that 1 Page is missing, it is not a bug. The default error page in Bludit v1 is deprecated and hence not included.
 
 ### Instructions:
