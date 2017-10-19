@@ -214,10 +214,7 @@ $RAW_CATEGORIES_PHP_FROM_V2 =
 {
     "general": {
         "name": "General",
-        "list": [
-            "a-page-under-general-category",
-            "welcome"
-        ]
+        "list": []
     },
     "music": {
         "name": "Music",
@@ -344,6 +341,9 @@ if (file_exists ($migratedContentPath . '/databases/pages.php') ){
             $values['type'] = 'page';
             $values['allowComments'] = 'true';
             $values['md5file'] = md5_file($migratedContentPath . '/pages/' . $pageKey . '/' . FILENAME);
+            // Each post and page must have a default empty category in Bludit v2
+            $values['category'] = isset($values['category']) ? $values['category'] : "";
+
             $finalPages[$pageKey] = $values;
         }
     }
@@ -364,6 +364,8 @@ if (file_exists ($migratedContentPath . '/databases/posts.php') ){
         $values['md5file'] = md5_file($migratedContentPath . '/pages/' . $pageKey . '/' . FILENAME);
         // Posts do not have a position by default in v1 but Bludit v2 requires them
         $values['position'] = isset($values['position']) ? $values['position'] : 1;
+        // Each post and page must have a default empty category in Bludit v2
+        $values['category'] = isset($values['category']) ? $values['category'] : "";
 
         // Ignore iteration if pageKey exists in $failedPosts
         if (in_array($pageKey, $failedPosts)) {
