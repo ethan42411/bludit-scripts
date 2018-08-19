@@ -270,22 +270,6 @@ foreach ($allDatabases as $database) {
             }
             break;
 
-        case 'tags.php':
-            if (file_exists($tmp)) {
-                $data = stripFirstLine(file_get_contents($tmp));
-                $json = json_decode($data);
-                foreach ($json as $tag) {
-                    // New values
-                    $tag->description = '';
-                    $tag->template = '';
-                }
-                // Insert to db
-                insert($tmp, $json);
-            } else {
-                msg("Database $database not found");
-            }
-            break;
-
         case 'pages.php':
             if (file_exists($tmp)) {
                 $data = stripFirstLine(file_get_contents($tmp));
