@@ -220,6 +220,7 @@ foreach ($allPlugins as $plugin) {
                 // New items
                 $json->toolbar1 = "formatselect bold italic bullist numlist blockquote alignleft aligncenter alignright link pagebreak image removeformat code";
                 $json->toolbar2 = "";
+                $json->mobileToolbar = "bold italic bullist formatselect";
                 $json->plugins = "code autolink image link pagebreak advlist lists textcolor colorpicker textpattern";
 
                 // Insert to db
