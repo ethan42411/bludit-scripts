@@ -331,6 +331,9 @@ foreach ($allDatabases as $database) {
                 $json->titleFormatCategory = '{{category-name}} | {{site-title}}';
                 $json->titleFormatTag = '{{tag-name}} | {{site-title}}';
 
+                // Set uriCategory if not available.
+                $json->uriCategory = isset($json->uriCategory) ? $json->uriCategory : '/category/';
+
                 // Insert to db
                 insert($tmp, $json);
             } else {
