@@ -320,7 +320,7 @@ foreach ($allDatabases as $database) {
                 // Safer compat
                 $json->theme = 'blogx';
                 $json->adminTheme = 'booty';
-                $json->currentBuild = 20180810;
+                $json->currentBuild = 20180821;
                 $json->instagram = '';
                 $json->gitlab = '';
                 $json->linkedin = '';
