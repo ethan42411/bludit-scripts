@@ -248,6 +248,22 @@ foreach ($allPlugins as $plugin) {
     }
 }
 
+/**
+ * Enable simple-stats and robots plugin (Available only on v3)
+ */
+mkdir($migratedContentPath . '/databases/plugins/robots', 0755);
+insert($migratedContentPath . '/databases/plugins/robots/db.php', [
+    'position' => 1
+]);
+
+mkdir($migratedContentPath . '/databases/plugins/simple-stats', 0755);
+insert($migratedContentPath . '/databases/plugins/simple-stats/db.php', [
+    'numberOfDays' => 7,
+    'label'        => 'Visits',
+    'excludeAdmins'=> false,
+    'position'     => 1
+]);
+
 // Migrate Core Databases to v3.0
 // Get Fresh List
 $allDatabases = array_diff(scandir($migratedContentPath . '/databases'), array('.', '..', 'plugins')); // Ignore plugins directory
