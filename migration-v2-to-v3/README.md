@@ -14,5 +14,10 @@
 * Run it and Copy freshly generated `bl-content` directory from migrations/* to the new Bludit v3 installation.
 * Done!
 
+### I have already migrated to v3 RC2 with this script ? Can I use it again for v3 final release?
+No. For final release -> Deactivate and activate the following plugins if you use them: `simple-stats, rss, sitemap, backup` to get rid of any errors.
+
 ### I found a bug:
 * Report an issue describing it as verbosely as possible.
+
+
