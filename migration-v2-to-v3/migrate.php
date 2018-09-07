@@ -187,6 +187,18 @@ foreach ($allPlugins as $plugin) {
 }
 
 /**
+ * Delete old v2 backup and timemachine-x directories to prevent potential problems in v3
+ */
+if (file_exists($migratedContentPath . '/backup')) {
+    recurse_delete($migratedContentPath . '/backup');
+    msg('Removed old v2 backups from backup plugin...');
+}
+if (file_exists($migratedContentPath . '/timemachine-x')) {
+    recurse_delete($migratedContentPath . '/timemachine-x');
+    msg('Removed old v2 timemachine-x points...');
+}
+
+/**
  * Create workspaces directory (New v3 feature for plugins)
  */
 mkdir($migratedContentPath . '/workspaces', 0755);

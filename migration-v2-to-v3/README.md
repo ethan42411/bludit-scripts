@@ -7,6 +7,7 @@
 * Script migrates only the Core plugin data and user data (pages, uploads etc.) to the new db structure.
 * Third party plugin data is not migrated intentionally. We do not know if v2 plugins are compatible with v3.
 * Script sets the theme to "blogx" for safer/better compatibility. Change your custom/stock theme manually after migration.
+* Backups generated from the v2 Backup plugin are removed since they are incompatible with v3.
 
 ### Instructions:
 * Take a backup of current installation.
