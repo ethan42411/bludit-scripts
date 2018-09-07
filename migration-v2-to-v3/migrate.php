@@ -186,6 +186,11 @@ foreach ($allPlugins as $plugin) {
     }
 }
 
+/**
+ * Create workspaces directory (New v3 feature for plugins)
+ */
+mkdir($migratedContentPath . '/workspaces', 0755);
+
 // Migrate Core Plugins
 // Get Fresh List
 msg('Migrating core plugin databases...');
@@ -207,11 +212,34 @@ foreach ($allPlugins as $plugin) {
 
                 // Insert to db
                 insert($tmp . 'db.php', $json);
+
+                /**
+                 * Create a rss workspace and move rss.xml to it.
+                 */
+                if ($plugin === 'rss') {
+                    mkdir($migratedContentPath . '/workspaces/rss', 0755);
+                    if (file_exists($tmp . 'rss.xml')) {
+                        rename($tmp . 'rss.xml', $migratedContentPath . '/workspaces/rss/rss.xml');
+                    }
+                }
             } else {
                 msg("Plugin $plugin db.php not found");
             }
             // dd($json);
             break;
+
+        case 'sitemap':
+            if (file_exists($tmp . 'db.php')) {
+                /**
+                 * Create a sitemap workspace and move sitemap.xml to it.
+                 */
+                mkdir($migratedContentPath . '/workspaces/sitemap', 0755);
+                if (file_exists($tmp . 'sitemap.xml')) {
+                    rename($tmp . 'sitemap.xml', $migratedContentPath . '/workspaces/sitemap/sitemap.xml');
+                }
+            } else {
+                msg("Plugin $plugin db.php not found");
+            }
 
         case 'tinymce':
             if (file_exists($tmp . 'db.php')) {
@@ -257,6 +285,8 @@ insert($migratedContentPath . '/databases/plugins/robots/db.php', [
 ]);
 
 mkdir($migratedContentPath . '/databases/plugins/simple-stats', 0755);
+// Create workspace
+mkdir($migratedContentPath . '/workspaces/simple-stats', 0755);
 insert($migratedContentPath . '/databases/plugins/simple-stats/db.php', [
     'numberOfDays' => 7,
     'label'        => 'Visits',
