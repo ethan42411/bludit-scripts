@@ -388,6 +388,8 @@ foreach ($allDatabases as $database) {
                 $json->titleFormatPages = '{{page-title}} | {{site-title}}';
                 $json->titleFormatCategory = '{{category-name}} | {{site-title}}';
                 $json->titleFormatTag = '{{tag-name}} | {{site-title}}';
+                $json->imageRestrict = false;
+                $json->imageRelativeToAbsolute = true;
 
                 // Set uriCategory if not available.
                 $json->uriCategory = isset($json->uriCategory) ? $json->uriCategory : '/category/';
