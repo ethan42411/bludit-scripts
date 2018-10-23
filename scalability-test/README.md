@@ -1,6 +1,6 @@
 ## Bludit Scalability Test script
 
-Bludit Version: >= v2.3
+Bludit Version: >= v3.2
 
 Instructions:
 
