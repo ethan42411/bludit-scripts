@@ -67,6 +67,7 @@ function createPages(int $fakeDataCount, string $type = 'published')
         echo "Generating $i / $fakeDataCount $type pages" . PHP_EOL;
         $page = [
             'type' => $type,
+            'username' => 'admin',
             'title' => ucfirst($lipsum->words(5)),
             'content' => $lipsum->paragraphs(5),
             'description' => ucfirst($lipsum->words(10)),
