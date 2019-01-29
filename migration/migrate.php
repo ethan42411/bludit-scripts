@@ -37,16 +37,16 @@ $databasesWhiteList = [
  * 4. stripFirstLine() : Removes mandatory BLUDIT string
  * 5. insert() : Inserts mandatory BLUDIT string + encoded Json back to database
  */
-function recurse_copy($src,$dst) {
+function recurse_copy($src, $dst)
+{
     $dir = opendir($src);
     @mkdir($dst);
-    while(false !== ( $file = readdir($dir)) ) {
+    while (false !== ( $file = readdir($dir))) {
         if (( $file != '.' ) && ( $file != '..' )) {
-            if ( is_dir($src . '/' . $file) ) {
-                recurse_copy($src . '/' . $file,$dst . '/' . $file);
-            }
-            else {
-                copy($src . '/' . $file,$dst . '/' . $file);
+            if (is_dir($src . '/' . $file)) {
+                recurse_copy($src . '/' . $file, $dst . '/' . $file);
+            } else {
+                copy($src . '/' . $file, $dst . '/' . $file);
             }
         }
     }
@@ -54,25 +54,28 @@ function recurse_copy($src,$dst) {
 }
 
 // Recursive delete
-function rrmdir($dir) {
+function rrmdir($dir)
+{
     if (is_dir($dir)) {
-    $objects = scandir($dir);
-    foreach ($objects as $object) {
-        if ($object != "." && $object != "..") {
-            if (is_dir($dir."/".$object))
-                rrmdir($dir."/".$object);
-            else
-                unlink($dir."/".$object);
+        $objects = scandir($dir);
+        foreach ($objects as $object) {
+            if ($object != "." && $object != "..") {
+                if (is_dir($dir."/".$object)) {
+                    rrmdir($dir."/".$object);
+                } else {
+                    unlink($dir."/".$object);
+                }
             }
-     }
-    rmdir($dir);
+        }
+        rmdir($dir);
     }
 }
 
 /* Dump and die */
-function dd($variable, $die = false) {
+function dd($variable, $die = false)
+{
     echo "<pre>";
-    ($die) ? die( print_r($variable) ) : print_r($variable);
+    ($die) ? die(print_r($variable)) : print_r($variable);
     echo "</pre>";
 }
 
@@ -80,11 +83,12 @@ function dd($variable, $die = false) {
 // Thanks ComFreek http://stackoverflow.com/questions/7740405/php-delete-the-first-line-of-a-text-and-return-the-rest
 function stripFirstLine($text)
 {
-    return substr( $text, strpos($text, "\n")+1 );
+    return substr($text, strpos($text, "\n")+1);
 }
 
 // Insert to database
-function insert($filePath, $data) {
+function insert($filePath, $data)
+{
     $compulsoryBluditLine = "<?php defined('BLUDIT') or die('Bludit CMS.'); ?>".PHP_EOL;
     $content = $compulsoryBluditLine . json_encode($data, JSON_PRETTY_PRINT);
     file_put_contents($filePath, $content);
@@ -93,14 +97,35 @@ function insert($filePath, $data) {
 /**
  * First we check if script was copied to the right directory.
  */
-if( !file_exists($contentDirectoryName) ){
+if (!file_exists($contentDirectoryName)) {
     die("Failed: Script was copied to the wrong directory. Make sure it is copied where $contentDirectoryName exists.");
+}
+
+/**
+ * Check if migration script supports the Bludit Version
+ */
+$init_path = __DIR__.'/bl-kernel/boot/init.php';
+$version = false;
+if (is_file($init_path)) {
+    $init_file = file($init_path);
+    foreach ($init_file as $line) {
+        if (strpos($line, 'BLUDIT_VERSION') !== false) {
+            $version = preg_replace("/[^0-9]/", "", $line);
+            if ($version[0] !== '1') {
+                die("Migration failed. Unsupported Bludit Version ($version). This script only supports migration from Bludit v1 to v2");
+            }
+            break;
+        }
+    }
+}
+if ($version === false) {
+    die('Migration failed. Unable to detect Bludit version');
 }
 
 /**
  * Create migrations directory (Delete if it already exists)
  */
-if( file_exists($migrationDirectoryName) ) {
+if (file_exists($migrationDirectoryName)) {
     /**
      * Empty the folder recursively
      * Thanks https://stackoverflow.com/questions/4594180/deleting-all-files-from-a-folder-using-php
@@ -108,13 +133,13 @@ if( file_exists($migrationDirectoryName) ) {
     rrmdir($migrationDirectoryName);
 }
 
-if ( !mkdir('migrations', 0755) ) {
+if (!mkdir('migrations', 0755)) {
     die('Failed to create directory. No write permission available.');
 } else {
     echo "<br>Successfuly created Migration Directory...";
 }
 
-if ( !mkdir($failedMigrationDirectoryName, 0755) ) {
+if (!mkdir($failedMigrationDirectoryName, 0755)) {
     die('Failed to create directory. No write permission available.');
 }
 
@@ -130,7 +155,7 @@ $failedPosts = [];
 // dd($allPages);
 
 foreach ($allPosts as $post) {
-    if ( !in_array($post, $allPages) ) {
+    if (!in_array($post, $allPages)) {
         recurse_copy($migratedContentPath . "/posts/" . $post, $migratedContentPath . "/pages/" . $post);
     } else {
         recurse_copy($migratedContentPath . "/posts/" . $post, $failedMigrationDirectoryName . "/" . $post);
@@ -152,7 +177,7 @@ $allPlugins = array_diff(scandir($migratedContentPath . '/databases/plugins'), a
 /* Delete non bludit core plugin/database configs */
 foreach ($allDatabases as $database) {
     if (! in_array($database, $databasesWhiteList)) {
-        if(is_dir ($migratedContentPath . '/databases/' . $database) ){
+        if (is_dir($migratedContentPath . '/databases/' . $database)) {
             rrmdir($migratedContentPath . '/databases/' . $database);
         } else {
             unlink($migratedContentPath . '/databases/' . $database);
@@ -171,7 +196,7 @@ foreach ($allPlugins as $plugin) {
 // dd($failedPosts);
 
 // Remove Error page
-if (file_exists ($migratedContentPath . "/pages/error") ) {
+if (file_exists($migratedContentPath . "/pages/error")) {
     rrmdir($migratedContentPath . "/pages/error");
 }
 
@@ -180,13 +205,13 @@ if (file_exists ($migratedContentPath . "/pages/error") ) {
 $allPlugins = array_diff(scandir($migratedContentPath . '/databases/plugins'), array('.', '..'));
 foreach ($allPlugins as $plugin) {
     $tmp = $migratedContentPath . '/databases/plugins/' . $plugin . '/';
-    switch($plugin) {
+    switch ($plugin) {
         case "tags":
-            if( file_exists($tmp . 'db.php') ){
-                $data = stripFirstLine( file_get_contents($tmp . 'db.php') );
+            if (file_exists($tmp . 'db.php')) {
+                $data = stripFirstLine(file_get_contents($tmp . 'db.php'));
                 $json = json_decode($data);
                 $json->position= 2;
-            } else{
+            } else {
                 echo "<br>Plugin $plugin db.php not found";
             }
             // Insert to db
@@ -228,13 +253,12 @@ $RAW_CATEGORIES_PHP_FROM_V2 =
 RAW;
 file_put_contents($tmp, $RAW_CATEGORIES_PHP_FROM_V2);
 
-foreach ( $allDatabases as $database ) {
+foreach ($allDatabases as $database) {
     $tmp = $migratedContentPath . '/databases/' . $database;
-    switch($database) {
-
+    switch ($database) {
         case "security.php":
-            if( file_exists($tmp) ){
-                $data = stripFirstLine( file_get_contents($tmp) );
+            if (file_exists($tmp)) {
+                $data = stripFirstLine(file_get_contents($tmp));
                 $json = json_decode($data, true);
                 $tmpWhiteListed = ['minutesBlocked', 'numberFailuresAllowed', 'blackList'];
                 foreach ($json as $key => $values) {
@@ -242,8 +266,7 @@ foreach ( $allDatabases as $database ) {
                         unset($json[$key]);
                     }
                 }
-
-            } else{
+            } else {
                 echo "<br>Database $database not found";
             }
             // Insert to db
@@ -252,8 +275,8 @@ foreach ( $allDatabases as $database ) {
             break;
 
         case "site.php":
-            if( file_exists($tmp) ){
-                $data = stripFirstLine( file_get_contents($tmp) );
+            if (file_exists($tmp)) {
+                $data = stripFirstLine(file_get_contents($tmp));
                 $json = json_decode($data);
                 $json->itemsPerPage = 6;
                 $json->language = "en";
@@ -265,7 +288,7 @@ foreach ( $allDatabases as $database ) {
                 unset($json->postsperpage);
                 unset($json->uriPost);
                 // cliMode is deprecated in Bludit v2
-                if ( isset($json->cliMode) ) {
+                if (isset($json->cliMode)) {
                     unset($json->cliMode);
                 }
             } else {
@@ -277,12 +300,12 @@ foreach ( $allDatabases as $database ) {
             break;
 
         case "tags.php":
-            if( file_exists($tmp) ){
-                $data = stripFirstLine( file_get_contents($tmp) );
+            if (file_exists($tmp)) {
+                $data = stripFirstLine(file_get_contents($tmp));
                 $json = json_decode($data, true);
                 $finalValidArray = [];
                 // Remove postsIndex
-                foreach($json as $key => $values) {
+                foreach ($json as $key => $values) {
                     if ($key == 'postsIndex') {
                         foreach ($values as $validKey => $validValues) {
                             $finalValidArray[$validKey] = $validValues;
@@ -290,13 +313,12 @@ foreach ( $allDatabases as $database ) {
                     }
                 }
                 // Rename posts key to v2.0 list
-                $tags = array_map(function($tag) {
+                $tags = array_map(function ($tag) {
                     return array(
                         'name' => $tag['name'],
                         'list' => $tag['posts']
                     );
                 }, $finalValidArray);
-
             } else {
                 echo "<br>Database $database not found";
             }
@@ -306,15 +328,14 @@ foreach ( $allDatabases as $database ) {
             break;
 
         case "users.php":
-            if( file_exists($tmp) ){
-                $data = stripFirstLine( file_get_contents($tmp) );
+            if (file_exists($tmp)) {
+                $data = stripFirstLine(file_get_contents($tmp));
                 $json = json_decode($data);
-                foreach($json as $user) {
+                foreach ($json as $user) {
                     // New values
                     $user->tokenAuth = "";
                     $user->tokenAuthTTL = $user->tokenEmailTTL;
                 }
-
             } else {
                 echo "<br>Database $database not found";
             }
@@ -330,8 +351,8 @@ foreach ( $allDatabases as $database ) {
  * Failed posts are available here $failedPosts
  */
 $finalPages = [];
-if (file_exists ($migratedContentPath . '/databases/pages.php') ){
-    $data = stripFirstLine( file_get_contents($migratedContentPath . '/databases/pages.php') );
+if (file_exists($migratedContentPath . '/databases/pages.php')) {
+    $data = stripFirstLine(file_get_contents($migratedContentPath . '/databases/pages.php'));
     $json = json_decode($data, true);
     foreach ($json as $pageKey => $values) {
         // Ignore Error page. Not needed.
@@ -351,11 +372,10 @@ if (file_exists ($migratedContentPath . '/databases/pages.php') ){
 
 // Migrate posts.php to pages.php
 $failedPostsMetaData = [];
-if (file_exists ($migratedContentPath . '/databases/posts.php') ){
-    $data = stripFirstLine( file_get_contents($migratedContentPath . '/databases/posts.php') );
+if (file_exists($migratedContentPath . '/databases/posts.php')) {
+    $data = stripFirstLine(file_get_contents($migratedContentPath . '/databases/posts.php'));
     $json = json_decode($data, true);
     foreach ($json as $pageKey => $values) {
-
         $values['status'] = ($values['status'] === 'draft') ? 'draft' : 'published';
         $values['type'] = 'post';
         $values['parent'] = isset($values['parent']) ? $values['parent'] : "";
@@ -377,12 +397,12 @@ if (file_exists ($migratedContentPath . '/databases/posts.php') ){
     }
 }
 // Add Failed Meta Data to failed.php if count > 0
-if ( count ($failedPostsMetaData) > 0) {
+if (count($failedPostsMetaData) > 0) {
     insert($failedMigrationDirectoryName . '/failed.php', $failedPostsMetaData);
 }
 
 // Delete Deprecated posts.php
-if (file_exists ($migratedContentPath . '/databases/posts.php') ){
+if (file_exists($migratedContentPath . '/databases/posts.php')) {
     unlink($migratedContentPath . '/databases/posts.php');
 }
 
@@ -392,7 +412,7 @@ insert($migratedContentPath . '/databases/pages.php', $finalPages);
 echo "<br>$breakLine";
 echo "<br>Failed Migrations (Posts): " . count($failedPosts);
 
-if( count($failedPosts) > 0 ){
+if (count($failedPosts) > 0) {
     echo "<br>Add these manually:";
     echo '<ol>';
     echo '<li>' . implode('<li>', $failedPosts);

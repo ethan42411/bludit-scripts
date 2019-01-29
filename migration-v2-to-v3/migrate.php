@@ -137,6 +137,27 @@ if (!file_exists($contentDirectoryName)) {
 }
 
 /**
+ * Check if migration script supports the Bludit Version
+ */
+$init_path = __DIR__.'/bl-kernel/boot/init.php';
+$version = false;
+if (is_file($init_path)) {
+    $init_file = file($init_path);
+    foreach ($init_file as $line) {
+        if (strpos($line, 'BLUDIT_VERSION') !== false) {
+            $version = preg_replace("/[^0-9]/", "", $line);
+            if ($version[0] !== '2') {
+                die("Migration failed. Unsupported Bludit Version ($version). This script only supports migration from Bludit v2 to v3");
+            }
+            break;
+        }
+    }
+}
+if ($version === false) {
+    die('Migration failed. Unable to detect Bludit version');
+}
+
+/**
  * Create migrations directory (Delete if it already exists)
  */
 if (file_exists($migrationDirectoryName)) {
