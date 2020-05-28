@@ -4,8 +4,8 @@
 DIR="repos"
 if [ -d "$DIR" ]; then
     rm -rf $DIR
-    mkdir $DIR && cd $DIR
 fi
+mkdir $DIR && cd $DIR
 
 while read repo; do
     git clone --depth 1 "$repo"
