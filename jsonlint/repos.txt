@@ -1,0 +1,3 @@
+https://github.com/bludit/bludit
+https://github.com/bludit/themes-repository
+https://github.com/bludit/plugins-repository
