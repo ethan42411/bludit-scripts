@@ -8,6 +8,7 @@ for cmd in curl unzip jq; do
     echo OK
   else
     echo missing
+    exit 1
   fi
 done
 
